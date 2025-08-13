@@ -1,0 +1,42 @@
+<h1>Drug Finder</h1>
+  <form method="GET" action="/search">
+    <input 
+    type="text" 
+    name="q" 
+    placeholder="Search for drugs..."
+    autocomplete="off"
+    hx-get="/search" 
+    hx-target="#results" 
+    hx-trigger="keyup changed delay:500ms"
+    hx-push-url="true"
+    />
+  </form>
+
+  <div id="results"></div>
+  
+  <a 
+  class="bg-purple-500 p-2 mt-6 text-white block"
+  hx-get="/page"
+  hx-target="#results"
+  hx-swap="innerHTML"
+  >Go to new page </a>
+ 
+<div x-data="{
+  openModal: false,
+}">
+  <button 
+  class="bg-amber-600 p-2 m-5"
+  @click="openModal = !openModal"
+  >Open Modal</button>
+  
+  <div 
+  class="bg-amber-600 text-white flex items-center text-center w-[60px]"
+  x-show="openModal"
+  >
+    Modal Showing
+  </div>
+  
+</div>
+
+
+
