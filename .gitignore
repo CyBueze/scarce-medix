@@ -42,3 +42,5 @@ storage/
 # Express cache/temp folders (if any)
 tmp/
 cache/
+
+things.md

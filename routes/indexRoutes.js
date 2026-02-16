@@ -2,15 +2,13 @@ import express from "express";
 const router = express.Router();
 
 router.get("/", (req, res)=>{
-  const account = {
-    name: "Zoie Foundation Operation Feed The Street Initiative",
-    number: "6360207920"
-  }
-  res.render("index", {account})
+  
+  res.render("index")
 })
 
-router.get("/page", (req, res)=>{
-  res.render("partials/page", {layout: false})
+
+router.get("/sos", (req, res)=>{
+  res.render("partials/sos")
 })
 
 export default router

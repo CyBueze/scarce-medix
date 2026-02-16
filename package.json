@@ -1,7 +1,7 @@
 {
-  "name": "zoie",
+  "name": "scarce medix",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "app.js",
   "type": "module",
   "scripts": {
     "dev": "nodemon app.js",
@@ -21,7 +21,9 @@
     "express-ejs-layouts": "^2.5.1",
     "express-session": "^1.18.1",
     "morgan": "^1.10.0",
-    "pocketbase": "^0.26.0"
+    "pocketbase": "^0.26.0",
+    "zare": "^3.1.1",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
