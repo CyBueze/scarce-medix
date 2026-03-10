@@ -36,7 +36,7 @@ export function WelcomeEmail({ firstName, ebookUrl }: WelcomeEmailProps) {
         </Text>
 
         <Text style={text}>
-          I'll send you a follow-up tomorrow with Mallam Ibrahim's full story (the 67-year-old 
+          I'll send you a follow-up tomorrow with Mr Alex Nduka's full story (the 67-year-old 
           retired teacher who avoided stroke and got off 3 medications).
         </Text>
 
@@ -47,7 +47,7 @@ export function WelcomeEmail({ firstName, ebookUrl }: WelcomeEmailProps) {
         <Text style={signature}>
           To your health,
           <br />
-          [Your Name]
+          Pharm. Sam
           <br />
           Scarce Medix
         </Text>

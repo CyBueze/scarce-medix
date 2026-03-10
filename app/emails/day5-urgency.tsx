@@ -131,7 +131,7 @@ export function Day5Email({ firstName, offerUrl }: Day5EmailProps) {
 
         <Section style={quickTestimonial}>
           <Text style={quickTestimonialText}>
-            <strong>Mallam Ibrahim:</strong> 180/110 → 128/82 in 90 days. Off 2 medications.
+            <strong>Mr Alex Nduka:</strong> 180/110 → 128/82 in 90 days. Off 2 medications.
           </Text>
         </Section>
 
@@ -273,9 +273,9 @@ export function Day5Email({ firstName, offerUrl }: Day5EmailProps) {
         <Text style={signature}>
           To your health, your transformation, and your peace of mind,
           <br />
-          [Your Name]
+          Pharm Sam
           <br />
-          SOS Advance Team
+          Scarce Medix
         </Text>
 
         <Section style={finalPsBox}>

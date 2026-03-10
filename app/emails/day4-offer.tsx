@@ -326,9 +326,9 @@ export function Day4Email({ firstName, offerUrl }: Day4EmailProps) {
         <Text style={signature}>
           To your health and transformation,
           <br />
-          [Your Name]
+          Pharm. Sam
           <br />
-          SOS Advance Team
+          Scarce Medix
         </Text>
 
         <Section style={psBox}>
@@ -342,7 +342,7 @@ export function Day4Email({ firstName, offerUrl }: Day4EmailProps) {
         <Section style={ppsBox}>
           <Text style={ppsText}>
             <strong>P.P.S.</strong> Still have questions? Reply to this email and I'll personally 
-            answer within 2 hours. Or WhatsApp us at [Your Number]. We're here to help.
+            answer within 2 hours. Or WhatsApp us at 09161352715. We're here to help.
           </Text>
         </Section>
       </Section>

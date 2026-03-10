@@ -1,10 +1,49 @@
 import { useState, useEffect } from "react";
 import { Button } from "~/components/ui/button";
-import { Link } from "react-router";
+import { Link, Form, useActionData, redirect, useNavigation, type ActionFunctionArgs } from "react-router";
+import { Resend } from 'resend';
+
+export async function action({ request }: ActionFunctionArgs) {
+  const formData = await request.formData();
+  const data = Object.fromEntries(formData);
+
+  // 1. Send the Email to yourself
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    
+    await resend.emails.send({
+      from: 'Scarce Medix <contact@mg.scarcemedix.com.ng>', // Use your verified domain here later
+      to: ['scarcemedix@gmail.com'],
+      subject: `New Order: ₦${data.package === '1_bottle' ? '18,900' : '37,800'} from ${data.fullName}`,
+      html: `
+        <h1>New Order Received</h1>
+        <p><strong>Customer:</strong> ${data.fullName}</p>
+        <p><strong>Phone:</strong> ${data.phoneNumber}</p>
+        <p><strong>Package:</strong> ${data.package}</p>
+        <p><strong>Location:</strong> ${data.city}, ${data.state}</p>
+        <p><strong>Address:</strong> ${data.address}</p>
+      `,
+    });
+  } catch (error) {
+    console.error("Email failed:", error);
+  }
+
+  // 2. Build the WhatsApp redirect URL
+  const message = `Hello, I just placed an order for the BP Support Kit (Magnesium Glycinate):\n\n` +
+                  `*Name:* ${data.fullName}\n` +
+                  `*Package:* ${data.package}\n` +
+                  `*Phone:* ${data.phoneNumber}\n` +
+                  `*Address:* ${data.address}, ${data.city}, ${data.state}`;
+  
+  const whatsappUrl = `https://wa.me/2349161352715?text=${encodeURIComponent(message)}`;
+
+  return redirect(whatsappUrl);
+}
 
 export default function Sostyp() {
-  // Simple visual timer logic for the 15-minute countdown
-  const [timeLeft, setTimeLeft] = useState(900); // 15 minutes in seconds
+  const actionData = useActionData<{ error?: Record<string, string[]> }>();
+  const [timeLeft, setTimeLeft] = useState(900);
+  const [selectedPackage, setSelectedPackage] = useState("2_bottles");
 
   useEffect(() => {
     if (timeLeft <= 0) return;
@@ -17,26 +56,30 @@ export default function Sostyp() {
     const secs = seconds % 60;
     return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
+  
+  const navigation = useNavigation();
+  
+  // This is true from the moment the user clicks until the redirect happens
+  const isSubmitting = navigation.state === "submitting";
 
   return (
-    <div className="min-h-screen bg-slate-50 overflow-x-hidden font-sans pb-20">
+    <div className="min-h-screen bg-slate-50 font-sans pb-20">
       {/* Top Urgency Bar */}
-      <div className="bg-red-600 text-white py-2 text-center px-4 sticky top-0 z-50">
+      <div className="bg-red-600 text-white py-2 text-center px-4 sticky top-0 z-50 shadow-md">
         <p className="text-xs sm:text-sm font-bold animate-pulse">
-          ⚠️ SPECIAL 50% DISCOUNT EXPIRES IN: {formatTime(timeLeft)}
+          ⚠️ SPECIAL DISCOUNT EXPIRES IN: {formatTime(timeLeft)}
         </p>
       </div>
 
-      <main className="max-w-4xl mx-auto px-4 pt-8 md:pt-12">
-        {/* Success Header */}
+      <main className="max-w-4xl mx-auto px-4 pt-8 md:pt-12 overflow-x-hidden">
         <header className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mb-4">
             <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="text-xl md:text-2xl font-bold text-slate-800">
-            I know you just downloaded the guide (thank you!).
+          <h1 className="text-xl md:text-2xl font-bold text-slate-800 px-2 leading-tight">
+            Success! Your BP Guide is on its way to your email.
           </h1>
         </header>
 
@@ -159,72 +202,145 @@ export default function Sostyp() {
                ))}
             </div>
 
-            {/* The Price Box */}
-            <div className="mt-12 bg-yellow-50 rounded-3xl border-4 border-yellow-400 p-8 text-center overflow-hidden relative">
-              <div className="absolute top-0 right-0 bg-red-600 text-white px-6 py-1 font-bold text-xs uppercase -rotate-45 translate-x-6 translate-y-4">
-                Limited
+        {/* Digital Value Stack */}
+        <div className="mt-12 bg-white rounded-3xl border-2 border-slate-900 overflow-hidden shadow-xl">
+          <div className="bg-slate-900 py-4 px-4 text-center">
+            <h3 className="text-white font-bold text-lg">THE BP FREEDOM TOTAL BUNDLE</h3>
+          </div>
+          <div className="p-6 md:p-8 space-y-4">
+            <div className="space-y-3">
+              <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+                <span className="text-slate-700 font-medium">✅ 60-Day Supply Magnesium Glycinate</span>
+                <span className="font-bold text-slate-900">₦18,900</span>
               </div>
-              <h4 className="text-slate-500 uppercase font-black text-sm mb-2 tracking-widest">60-Day Supply Magnesium Glycinate</h4>
-              <div className="mb-2">
-                <p className="text-2xl text-slate-400 line-through">₦38,000</p>
-                <span className="text-5xl font-black text-slate-900 tracking-tighter">₦18,900</span>
+              <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+                <span className="text-green-600 font-bold">🎁 BONUS 1: Nigerian BP Food Table (PDF)</span>
+                <span className="text-slate-400 line-through text-xs">₦5,000</span>
               </div>
-              <p className="text-red-600 font-black text-lg mb-6 tracking-tight">SAVE ₦19,100! (50% OFF!)</p>
-              
-              <ul className="text-left inline-block space-y-2 mb-8 text-sm md:text-base">
-                {["60-Day Supply (120 capsules)", "Pharmaceutical Grade", "FREE Delivery (Nationwide)", "Pay on Delivery (Inspect First)", "30-Day Money-Back Guarantee"].map((check, i) => (
-                  <li key={i} className="flex items-center gap-2 font-bold text-slate-700">
-                    <span className="text-green-600">✓</span> {check}
-                  </li>
-                ))}
-              </ul>
+              <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+                <span className="text-green-600 font-bold">🎁 BONUS 2: 30-Day BP Tracking Journal</span>
+                <span className="text-slate-400 line-through text-xs">₦3,500</span>
               </div>
-
-          <div className="space-y-4 my-4">
-          <Button className="h-auto py-8 w-full bg-green-600 hover:bg-green-700 text-white font-black rounded-xl shadow-xl transition-all transform hover:scale-[1.02] active:scale-95 flex flex-col items-center justify-center px-4 overflow-hidden">
-            <span className="md:text-lg uppercase tracking-tight leading-tight whitespace-normal break-words text-center">
-              YES! SEND ME MAGNESIUM GLYCINATE
-            </span>
-          </Button>
-        
-          <Link to="/sos-download" className="block text-slate-400 text-xs hover:underline">
-            No thanks, I'll just stick with the free guide for now...
-          </Link>
+              <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+                <span className="text-green-600 font-bold">🎁 BONUS 3: Fast-Action Delivery</span>
+                <span className="text-slate-400 font-bold text-xs uppercase">FREE</span>
+              </div>
+            </div>
+            <div className="bg-yellow-50 p-6 rounded-2xl text-center border-2 border-dashed border-yellow-400">
+              <p className="text-slate-600 text-xs font-bold uppercase tracking-widest">Total Value: <span className="line-through">₦27,400</span></p>
+              <p className="text-4xl font-black text-slate-900 mt-1 tracking-tighter">ONLY ₦18,900</p>
+              <p className="text-red-600 font-bold text-sm mt-1 animate-bounce">You save ₦8,500 today!</p>
+            </div>
+          </div>
         </div>
 
-            {/* Guarantee Section */}
-            <div className="mt-12 border-2 border-slate-900 rounded-3xl p-6 md:p-10 flex flex-col md:flex-row gap-8 items-center">
-              <div className="w-24 h-24 flex-shrink-0 bg-slate-900 rounded-full flex items-center justify-center text-white text-4xl">
-                🛡️
-              </div>
-              <div>
-                <h4 className="text-xl font-black text-slate-900 mb-2 uppercase">My "Sleep Better or Pay Nothing" Guarantee:</h4>
-                <p className="text-sm text-slate-600 italic">
-                  Try Magnesium Glycinate for 30 days. If your parent doesn't sleep better, feel more relaxed, or notice their BP trending down... simply return it (even if empty) and we'll refund every naira. <span className="font-bold">You literally risk nothing.</span>
-                </p>
-              </div>
+        {/* Serious Warning Box */}
+        <div className="mt-10 bg-red-50 border-2 border-red-200 rounded-2xl p-6">
+          <div className="flex items-start gap-4">
+            <span className="text-2xl">🚫</span>
+            <div>
+              <h4 className="text-red-900 font-bold text-lg mb-1 tracking-tight">ATTENTION: SERIOUS BUYERS ONLY</h4>
+              <p className="text-red-800 text-sm leading-relaxed font-medium">
+                Please <span className="font-black">ONLY</span> fill this form if you have the cash ready and will be available to receive your order within <span className="underline">24 to 72 hours</span>. We spend significantly on logistics to offer <span className="font-bold">Free Delivery</span>—please help us serve you better by being ready.
+              </p>
             </div>
+          </div>
+        </div>
 
-            {/* Social Proof Footer */}
-            <div className="mt-12 text-center pt-8 border-t border-slate-100">
-              <p className="text-sm font-bold text-slate-800">847 Lagos families have ordered in the last 30 days</p>
-              <div className="flex items-center justify-center gap-1 text-yellow-500 mt-2">
-                {[1,2,3,4,5].map(s => <span key={s}>★</span>)}
-                <span className="text-slate-600 text-xs ml-2 font-bold">4.8/5 (312 verified reviews)</span>
-              </div>
+            {/* ORDER FORM */}
+            <div id="order-form" className="mt-10">
+              <Form method="post" className="space-y-6">
+                <div className="space-y-4">
+                  <h3 className="text-xl font-black text-slate-900 uppercase">Delivery Information</h3>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <input name="fullName" required className="w-full p-4 rounded-xl border-2 border-slate-200 focus:border-green-600 outline-none transition-all autofill:shadow-[inset_0_0_0_1000px_white] [&-webkit-autofill]:shadow-[inset_0_0_0_1000px_white]" placeholder="Full Name" />
+                    <input name="phoneNumber" type="tel" required className="w-full p-4 rounded-xl border-2 border-slate-200 focus:border-green-600 outline-none transition-all" placeholder="Phone Number" />
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <input name="state" required className="w-full p-4 rounded-xl border-2 border-slate-200 focus:border-green-600 outline-none transition-all" placeholder="State" />
+                    <input name="city" required className="w-full p-4 rounded-xl border-2 border-slate-200 focus:border-green-600 outline-none transition-all" placeholder="City" />
+                  </div>
+                  <textarea name="address" required rows={2} className="w-full p-4 rounded-xl border-2 border-slate-200 focus:border-green-600 outline-none transition-all" placeholder="Full Delivery Address"></textarea>
+                </div>
+
+                {/* FIXED PACKAGE SELECTION */}
+                <div className="space-y-4">
+                  <p className="text-sm font-bold text-slate-600 uppercase">Select Your Bundle:</p>
+                  <div className="grid gap-3">
+                    <label className={`relative flex items-center p-5 rounded-2xl border-2 cursor-pointer transition-all ${selectedPackage === '1_bottle' ? 'border-green-600 bg-green-50' : 'border-slate-200 bg-white'}`}>
+                      <input 
+                        type="radio" 
+                        name="package" 
+                        value="1_bottle" 
+                        className="mr-4 h-5 w-5 accent-green-600"
+                        checked={selectedPackage === '1_bottle'}
+                        onChange={(e) => setSelectedPackage(e.target.value)}
+                      />
+                      <div className="flex-1">
+                        <p className="font-black text-slate-900 uppercase">1 Bottle Bundle</p>
+                        <p className="text-xs text-slate-500 italic">+ All Digital Bonuses</p>
+                      </div>
+                      <p className="font-black text-xl text-slate-900">₦18,900</p>
+                    </label>
+
+                    <label className={`relative flex items-center p-5 rounded-2xl border-2 cursor-pointer transition-all ${selectedPackage === '2_bottles' ? 'border-green-600 bg-green-50' : 'border-slate-200 bg-white'}`}>
+                      <input 
+                        type="radio" 
+                        name="package" 
+                        value="2_bottles" 
+                        className="mr-4 h-5 w-5 accent-green-600"
+                        checked={selectedPackage === '2_bottles'}
+                        onChange={(e) => setSelectedPackage(e.target.value)}
+                      />
+                      <div className="flex-1">
+                        <p className="font-black text-slate-900 uppercase">2 Bottles Bundle</p>
+                        <p className="text-xs text-slate-500 italic">Recommended for Results</p>
+                      </div>
+                      <p className="font-black text-xl text-slate-900">₦37,800</p>
+                    </label>
+                  </div>
+                </div>
+
+                <Button 
+                  type="submit"
+                  disabled={isSubmitting} // Prevents multiple orders/emails
+                  className="w-full h-auto py-6 bg-green-600 disabled:bg-slate-400"
+                >
+                  {isSubmitting ? (
+                    <div className="flex items-center gap-2">
+                      <span className="animate-spin">⏳</span>
+                      <p>Processing Your Order...</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center">
+                      <p>Confirm Order - Pay on Delivery</p>
+                      <span className="text-[10px] font-medium opacity-90 mt-1">
+                        Free Nationwide Shipping Included
+                      </span>
+                    </div>
+                  )}
+                </Button>
+              </Form>
             </div>
-
           </div>
         </div>
       </main>
 
-      {/* Compliance Disclaimer */}
-      <footer className="mt-20 px-4 py-10 bg-slate-100 text-[10px] text-slate-400 text-center leading-relaxed">
-        <div className="max-w-3xl mx-auto">
-          <p className="mb-4">
-            Disclaimer: These statements have not been evaluated by NAFDAC. This product is a dietary supplement and is not intended to diagnose, treat, cure, or prevent any disease. Consult your physician before starting any new supplement.
+            {/* Compliance Disclaimer */}
+      <footer className="mt-20 px-4 py-12 bg-slate-100 text-[10px] text-slate-400 text-center leading-relaxed">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="space-y-2">
+            <p className="uppercase font-bold tracking-[0.2em] text-slate-500">Platform Compliance</p>
+            <p className="max-w-3xl mx-auto">
+              This site is not a part of the Facebook website or Facebook Inc. Additionally, This site is NOT endorsed by Facebook in any way. FACEBOOK is a trademark of FACEBOOK, Inc. This site is not a part of the TikTok website or ByteDance Ltd. Additionally, This site is NOT endorsed by TikTok in any way. TIKTOK is a trademark of ByteDance Ltd.
+            </p>
+          </div>
+          <p className="border-t border-slate-200 pt-6 max-w-2xl mx-auto">
+            Disclaimer: These statements have not been evaluated by NAFDAC. This product is a dietary supplement and is not intended to diagnose, treat, cure, or prevent any disease. Results vary from person to person.
           </p>
-          <p>© {new Date().getFullYear()} Blood Pressure Freedom Project. All rights reserved.</p>
+          <p className="font-bold text-slate-500 pt-2 tracking-wide uppercase">
+            © {new Date().getFullYear()} Blood Pressure Freedom Project – scarcemedix.com.ng – All Rights Reserved
+          </p>
         </div>
       </footer>
     </div>

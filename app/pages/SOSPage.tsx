@@ -62,7 +62,7 @@ export default function SOSPage() {
 
           <div className="prose prose-slate lg:prose-lg text-gray-700 leading-relaxed space-y-6">
             <p className="text-lg font-bold text-blue-800">
-              My name is Mr Alex Nduka Yusuf. I'm 67, retired Maths teacher from
+              My name is Mr Alex Nduka. I'm 67, retired Maths teacher from
               Surulere, Lagos.
             </p>
 
