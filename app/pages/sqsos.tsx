@@ -1,7 +1,7 @@
 // app/routes/sqsos.tsx
 
 import { Button } from "~/components/ui/button"
-import { Form, redirect, useActionData, type ActionFunctionArgs } from "react-router";
+import { Form, redirect, useActionData, type ActionFunctionArgs, useNavigation } from "react-router";
 import { z } from "zod";
 import { Resend } from "resend";
 import { WelcomeEmail } from "~/emails/welcome";
@@ -154,6 +154,10 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function Sqsos() {
   const actionData = useActionData<typeof action>();
+  
+  const navigation = useNavigation()
+  
+  const isSubmitting = navigation.state === "submitting";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-green-50 to-blue-50 overflow-x-hidden">
@@ -333,9 +337,20 @@ export default function Sqsos() {
 
                   <Button 
                     type="submit"
+                    disabled={isSubmitting}
                     className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-black text-sm sm:text-base tracking-tight py-6 sm:py-7 rounded-xl shadow-lg transition-transform active:scale-95 uppercase"
                   >
-                    📥 Send My Free Guide Now
+                  {isSubmitting ? (
+                    <div className="flex items-center gap-2">
+                      <span className="animate-spin">⏳</span>
+                      <p>Sending your ebook...</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center">
+                      <p>📥 Send My Free Guide Now</p>
+                    </div>
+                  )}
+                   
                   </Button>
 
                   <div className="flex items-center justify-center gap-2 opacity-80">
